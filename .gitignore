@@ -6,8 +6,6 @@ __pycache__/
 venv/
 ENV/
 
-.docker-data/
-
 .vscode/
 .idea/
 .DS_Store
