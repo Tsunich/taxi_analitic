@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: taxi_db
+      POSTGRES_USER: Tsuki
+      POSTGRES_PASSWORD: 545610
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  generator:
+    build: ./generator
+    depends_on:
+      - db
+    environment:
+      - PYTHONUNBUFFERED=1
+
