@@ -8,6 +8,8 @@ services:
       POSTGRES_PASSWORD: 545610
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
 
   generator:
     build: ./generator
@@ -16,3 +18,49 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
 
+  redash_db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: redash
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+
+  redis:
+    image: redis:7-alpine
+
+  redash:
+    image: redash/redash:10.1.0.b50633
+    command: server
+    depends_on:
+      - redash_db
+      - redis
+    ports:
+      - "5000:5000"
+    environment:
+      PYTHONUNBUFFERED: 1
+      REDASH_DATABASE_URL: "postgresql://admin:password@redash_db/redash"
+      REDASH_REDIS_URL: "redis://redis:6379/0"
+      REDASH_COOKIE_SECRET: "verysecretkey"
+
+  redash_worker:
+    image: redash/redash:10.1.0.b50633
+    command: worker
+    depends_on:
+      - redash
+      - redash_db
+      - redis
+    environment:
+      REDASH_DATABASE_URL: "postgresql://admin:password@redash_db/redash"
+      REDASH_REDIS_URL: "redis://redis:6379/0"
+      REDASH_COOKIE_SECRET: "verysecretkey"
+      PYTHONUNBUFFERED: 1
+
+  redash_scheduler:
+    image: redash/redash:10.1.0.b50633
+    command: scheduler
+    depends_on:
+      - redash
+    environment:
+      REDASH_DATABASE_URL: "postgresql://admin:password@redash_db/redash"
+      REDASH_REDIS_URL: "redis://redis:6379/0"
+      REDASH_COOKIE_SECRET: "verysecretkey"

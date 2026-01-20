@@ -15,11 +15,10 @@ def load_streets():
         with open('streets.txt', 'r', encoding='utf-8') as f:
             lines = [line.strip() for line in f if line.strip()]
         
-        # Определяем тип
         for index, line in enumerate(lines):
             if index < 12:
                 st_type = "пер."
-            elif 12 <= index < 19: # 12 + 7 = 19
+            elif 12 <= index < 19:
                 st_type = "пр-кт"
             else:
                 st_type = "ул."
@@ -93,7 +92,7 @@ while True:
 
         fare = round(distance * 12.5, 2)
         rating = random.choices(pop, weights=wts)[0]
-        s_type = random.choice(['Такси', 'Доставка'])
+        s_type = random.choices(['Такси', 'Доставка'], weights=[65, 35], k=1)[0]
 
         # Запись в базу
         cursor.execute("""
@@ -104,7 +103,8 @@ while True:
         conn.commit()
         print(f"[{s_type.upper()}] {pickup} -> {dropoff} | {distance} км. | {fare} руб. | {rating} |", flush=True)
         
-        time.sleep(1)
+        sleep_time = random.uniform(0.2, 5.0)
+        time.sleep(sleep_time)
         
     except Exception as e:
         print(f"Ошибка в цикле: {e}", flush=True)
